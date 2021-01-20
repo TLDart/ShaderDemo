@@ -1,0 +1,12 @@
+varying vec3 normal;
+vec3 direcaoL= vec3( 1,0,1);
+float intensity ;
+
+void main(void) {
+
+        direcaoL  = normalize(direcaoL);
+        intensity = dot( direcaoL, normal);
+        intensity = max ( intensity, 0.0); 
+
+	gl_FragColor    = intensity*gl_Color;
+}

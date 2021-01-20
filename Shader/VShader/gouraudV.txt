@@ -1,0 +1,51 @@
+//Defining the material coeficients, set to 1 for testing
+float ks = 1.0;
+float ka = 1.0;
+float kd = 1.0;
+attribute vec3 position;
+varying vec3 vertPos;
+vec3  direcaoL= vec3(0,1,0);
+float diffLight;
+vec3  nNormal;
+varying vec4  vVertex;
+varying vec3  vNormal;	
+varying vec3  specLight;	
+vec4    cor   = vec4(0.4157, 0.0627, 0.9804, 0.664);
+
+
+//Notes:
+// In the gouraud method the vertex are calculated using the Phong method and the Fragments are calculated using an interpolation of the Vertex
+
+void main(void) { 
+        float ambient;
+        vNormal = gl_Normal ;
+	vVertex = normalize( gl_ModelViewMatrix * gl_Vertex );
+        //Ambient 
+        ambient = ka;
+
+        //Specular
+
+
+        //Difuse
+        vec4 vertPos4 = gl_ModelViewMatrix  * vec4(position, 1.0);
+        vertPos = vec3(vertPos4) / vertPos4.w;
+
+        
+	direcaoL  = normalize (direcaoL);    // caso o vetor de iluminacao nao seja normalizado
+	nNormal   = normalize( gl_Normal);
+        diffLight = dot(direcaoL, nNormal);
+        diffLight = max (diffLight, 0.0); 
+        //Spec Light
+        float specular = 0.0;
+        specLight = reflect(direcaoL,nNormal);
+        vec3 V = normalize(-vertPos);
+        float specAngle = max(dot(specLight, V), 0.0);
+        specular = pow(specAngle,6.1);
+
+
+        //Calculating the color
+        //after calculating the intensity we can then determine the color a determined point
+        gl_FrontColor   = (diffLight + specular)*cor ;
+        gl_Position     = gl_ModelViewProjectionMatrix * gl_Vertex;	
+}
+

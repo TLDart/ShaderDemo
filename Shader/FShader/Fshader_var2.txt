@@ -1,0 +1,18 @@
+uniform vec3  Direcao2;
+varying vec3  vNormal;
+float intensity;
+
+void main(void) {
+
+    vec3  nNormal= normalize( vNormal) ;
+    intensity = max( dot( nNormal, Direcao), 0.0);
+
+    if (intensity>0.85) 
+	 gl_FragColor=vec4(0, 0,1,1);
+    else if (intensity>0.4) 
+	 gl_FragColor=vec4(0.3, 0.3, 0.3,1);
+    else 
+         discard;
+	 
+
+}
