@@ -106,8 +106,8 @@ void BuiltShader(char * f1, char* f2, int n) {
 void InitShader(void) {
 
 	//------------------------ Criar+linkar
-	char filenameV[] = "Shader/VShader/gouraudV.txt";
-	char filenameF[] = "Shader/FShader/gouraudF.txt";
+	char filenameV[] = "Shader/VShader/gouraudV.glsl";
+	char filenameF[] = "Shader/FShader/gouraudF.glsl";
 	BuiltShader(filenameV, filenameF, 0);
 	glUseProgramObjectARB(ShaderProgram[0]);
 	uniDir[0] = glGetUniformLocation(ShaderProgram[0], "Direcao");
@@ -117,8 +117,8 @@ void InitShader(void) {
 	uniUserPos[0] = glGetUniformLocation(ShaderProgram[0], "userPos");
 	glUniform3fv (uniUserPos[0], 1, userPos);
 
-	char filenameV1[] = "Shader/VShader/PhongV.txt";
-	char filenameF1[] = "Shader/FShader/PhongF.txt";
+	char filenameV1[] = "Shader/VShader/PhongV.glsl";
+	char filenameF1[] = "Shader/FShader/PhongF.glsl";
 	BuiltShader(filenameV1, filenameF1, 1);
 	glUseProgramObjectARB(ShaderProgram[1]);
 	uniDir[1] = glGetUniformLocation(ShaderProgram[1], "Light_dir");
