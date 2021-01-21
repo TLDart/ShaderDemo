@@ -1,48 +1,37 @@
-/* ===================================================================================
-	Departamento Eng. Informatica - FCTUC
-	Computacao Grafica - 2019/20
-	................................................... JHenriques / EPolisciuc
-	======================================================================================= */
-
-
-	//.................................................... Bibliotecas necessarias
-#include <stdio.h>				// printf
-#include <fstream>				// printf
+#include <stdio.h>				
+#include <fstream>				
 
 #include <string>
 #include <fstream>
 
 #include <errno.h>
-#include <GL/glew.h>			// openGL
-#include <GL/freeglut.h>		// openGL
-#include <math.h>		// openGL
+#include <GL/glew.h>			
+#include <GL/freeglut.h>		
+#include <math.h>	
 
 #pragma comment(lib,"glew32.lib")
 #pragma comment(lib,"glu32.lib")
 #pragma comment(lib,"opengl32.lib")
+#define PI 3.14159
 
-//.................................................... Variaveis
-GLint	wScreen = 800, hScreen = 800;		//.. janela
-
-//------------------------------------------------------------ Observador 
-
+GLint	width = 800, height = 800;	
+GLfloat  rProjection = 15, aProjection = 0.5* PI, incProjection = 0.25;
+float obsP[] = {0,0,4};
+GLfloat  obsT[] = { obsP[0] - rProjection * cos(aProjection), obsP[1], obsP[2] - rProjection * sin(aProjection) };
+GLfloat		worldMax = 30.0;	
+int type = 0;	
 GLint  uniOp[2];
 GLint  uniDir[2];
 GLint  uniUserPos[2];
 float  Direcao[] = {0, -1, 1 };
-float userPos[] = {0,0,4};
 float  opcao = 0;
 
-//------------------------------------------ Defini��o dos ficheiros dos shaders: vertices + fragmentos
-
-//---------------------------------------------------------- SHADERS variaveis
 char* VertexShaderSource;
 char* FragmentShaderSource;
 GLuint  VertexShader[2], FragmentShader[2];
 GLuint  ShaderProgram[2];
 
 
-//============================================= 1. Ler um ficheiro com um shader
 char* readShaderFile(char* FileName) {
 
 	char* DATA = NULL;
@@ -113,7 +102,7 @@ void InitShader(void) {
 	uniDir[0] = glGetUniformLocation(ShaderProgram[0], "lightDir");
 	glUniform3fv(uniDir[0], 1, Direcao);
 	uniUserPos[0] = glGetUniformLocation(ShaderProgram[0], "userPos");
-	glUniform3fv (uniUserPos[0], 1, userPos);
+	glUniform3fv (uniUserPos[0], 1, obsP);
 
 	char filenameV1[] = "Shader/VShader/PhongV.glsl";
 	char filenameF1[] = "Shader/FShader/PhongF.glsl";
@@ -122,7 +111,7 @@ void InitShader(void) {
 	uniDir[1] = glGetUniformLocation(ShaderProgram[1], "lightDir");
 	glUniform3fv(uniDir[1], 1, Direcao);
 	uniUserPos[1] = glGetUniformLocation(ShaderProgram[1], "userPos");
-	glUniform3fv (uniUserPos[1], 1, userPos);
+	glUniform3fv (uniUserPos[1], 1, obsP);
 	
 }
 
@@ -134,7 +123,7 @@ void DeInitShader(int n) {
 	glDeleteShader(ShaderProgram[n]);
 }
 
-void Inicializa(void)
+void init(void)
 {
 	glClearColor(0.0, 0.0, 0.0, 1.0);	//....	Cor para apagar ecran (Preto)
 
@@ -147,15 +136,23 @@ void Desenha(void)
 {
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glViewport(0, 0, wScreen, hScreen);
+	glViewport(0, 0, width, height);
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(-5, 5, -5, 5, -5, 5);
+	if(type ==0)
+		glOrtho(-5, 5, -5, 5, -5, 5);
+	else
+		gluPerspective(90, 1, 0.1, 10.0);
+
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(userPos[0],userPos[1],userPos[2], 0, 0, 0, 0, 1, 0);
+
+	if(type == 0)
+		gluLookAt(obsP[0],obsP[1],obsP[2], obsT[0], obsT[1], obsT[2], 0, 1, 0);
+	else
+		gluLookAt(obsP[0],obsP[1],obsP[2], obsT[0], obsT[1], obsT[2], 0, 1, 0);
 	
 	Direcao[0] = cos(3.14*opcao/180.0);
 	Direcao[2] = sin(3.14 * opcao / 180.0);
@@ -163,7 +160,7 @@ void Desenha(void)
 	glUseProgramObjectARB(ShaderProgram[1]);
 	glUniform1f(uniOp[0], opcao);
 	glUniform3fv(uniDir[0], 1, Direcao);
-	glUniform3fv (uniUserPos[0], 1, userPos);
+	glUniform3fv (uniUserPos[0], 1, obsP);
 
 	glColor3f(1,1,0);
 	glPushMatrix();
@@ -175,7 +172,7 @@ void Desenha(void)
 	glUseProgramObjectARB(ShaderProgram[0]);
 	glUniform1f(uniOp[1], opcao);
 	glUniform3fv(uniDir[1], 1, Direcao);
-	glUniform3fv (uniUserPos[1], 1, userPos);
+	glUniform3fv (uniUserPos[1], 1, obsP);
 
 
 	glColor3f(1,0,0);
@@ -185,76 +182,74 @@ void Desenha(void)
 		glutSolidSphere(0.8,32,32);
 	glPopMatrix();
 
-	glutSwapBuffers();						//.. actualiza ecran
+	glutSwapBuffers();						
 }
 
-
-// -----------------------------------------------------------------------
-
-//����������������������������������������Fun��o callback eventos teclado 
 void Teclado(unsigned char key, int x, int y) {
 
 	switch (key) {
+		case 't':
+			type = !type;
 
-	case 'o':
-	case 'O':
-		opcao = opcao+10;
-		glutPostRedisplay();
-		break;
-	case 'w':
-		userPos[0]++;
-		glutPostRedisplay();
-		break;
-	case 's':
-		userPos[0]--;
-		glutPostRedisplay();
-		break;
-	case 'a':
-		userPos[1]++;
-		glutPostRedisplay();
-		break;
-	case 'd':
-		userPos[1]--;
-		glutPostRedisplay();
-		break;
-	case 27:					//ESC
-		exit(0);
-		break;
+		case 'o':
+		case 'O':
+			opcao = opcao+10;
+			glutPostRedisplay();
+			break;
+		case 27:					//ESC
+			exit(0);
+			break;
 	}
 }
 
+GLvoid resize(GLsizei w, GLsizei h) {
+	width= w;
+	height = h;
+	glViewport(0, 0, width, height);
+	glutPostRedisplay();
+}
+
+void arrowKeys(int key, int x, int y) {
+		
+		if (key == GLUT_KEY_UP)    {obsP[0] = obsP[0] + incProjection * cos(aProjection); obsP[2] = obsP[2] - incProjection * sin(aProjection); }
+		if (key == GLUT_KEY_DOWN)  {obsP[0] = obsP[0] - incProjection * cos(aProjection); obsP[2] = obsP[2] + incProjection * sin(aProjection); }
+		if (key == GLUT_KEY_LEFT)  aProjection += 0.1;
+		if (key == GLUT_KEY_RIGHT) aProjection -= 0.1;
+
+		if (obsP[1] > worldMax)   obsP[1] = worldMax;
+		if (obsP[1] < -worldMax)  obsP[1] = -worldMax;
+
+		obsT[0] = obsP[0] + rProjection * cos(aProjection);
+		obsT[2] = obsP[2] - rProjection* sin(aProjection);
+		   
+	    glutPostRedisplay();
+
+}
 
 
-//-----------------------------------------------------------------------------------
-//																		         MAIN
-//-----------------------------------------------------------------------------------
 int main(int argc, char** argv)
 {
-	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	glutInit(&argc, argv);							//===1:Inicia janela
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 	glutInitWindowSize(800, 800);					//		:dimensoes (pixeis)
 	glutInitWindowPosition(500, 40);				//		:localizacao
 	glutCreateWindow("Phong and Gouraud Shader Demo");
+	glutReshapeFunc(resize);
+	init();
 
-	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	Inicializa();
-
-	//------------------------------------  GLEW
 	GLenum err = glewInit();
 	InitShader();
 
 
+	glutSpecialFunc(arrowKeys); 
+	
 
-
-	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-													//===3:Definicao callbaks	
-	glutDisplayFunc(Desenha);						//		:desenho
-	glutKeyboardFunc(Teclado);						//		:eventos teclado
+	glutDisplayFunc(Desenha);						
+	glutKeyboardFunc(Teclado);						
 	glutIdleFunc(Desenha);
 
-	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	glutMainLoop();								//===4:Inicia processamento
+	
+	glutMainLoop();								
 	DeInitShader(0);
 	DeInitShader(1);
 	return 1;
