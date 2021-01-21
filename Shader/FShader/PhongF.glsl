@@ -11,8 +11,19 @@ float kd = 1.0;
 vec4 color = vec4(0.2549, 0.902, 0.0, 1.0);
 void main(void) {
     float ambient, diffuse, specular, specAngle;
+    vec3 userVect;
+
+    userVect = normalize((Obs_pos - v_pos3)); // Getting a vector from user to point
+    vec3 specInvRay = reflect(Light_dir,nNormal);
+    specAngle = max(dot(specInvRay, userVect), 0.0); //The product between the position of the camera and and Specular inverse ray
+    //Ambient
+    ambient = ka * 0.4;
+
+    //Diffuse
     diffuse = kd * max(dot(Light_dir, nNormal), 0.0);
 
-    gl_FragColor =  diffuse * color;
-    //gl_FragColor = vec4(1,1,0,1);
+    //Specular
+    specular = ks * pow(specAngle,2.1);
+
+    gl_FragColor   = (ambient + diffuse + specular)* color ;
 }
