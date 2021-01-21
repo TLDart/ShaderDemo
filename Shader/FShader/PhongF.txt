@@ -1,0 +1,36 @@
+varying vec3 normal;
+vec3 lightDir= vec3( 1,0,1);
+float intensity ;
+float ks = 1.0;
+float ka = 0.4;
+float kd = 1.0;
+attribute vec3 position;
+varying vec3 vertPos;
+vec3  lightDir= vec3(0,1,0);
+varying vec3  specInvRay;	
+
+void main(void) { 
+        float ambient;
+        float diffuse = 1.0;
+        float specular = 0.0;
+        normal   = normalize(gl_Normal);
+	lightDir  = normalize (lightDir);   
+        vec4 vertPos4 = gl_ModelViewMatrix  * vec4(position, 1.0); //Getting the user position
+        vertPos = vec3(vertPos4) / vertPos4.w; // Coverting it to vec3
+        vec3 V = normalize(-vertPos); //Normalize the userPos
+        //Ambient 
+        ambient = ka * 0.4;
+
+        //Difuse
+        diffuse = kd * max(dot(lightDir, normal), 0.0);
+
+
+        //Specular
+        specInvRay = reflect(lightDir,normal);
+        float specAngle = max(dot(specInvRay, V), 0.0); //The product between the position of the camera and and Specular inverse ray
+        specular = ks * pow(specAngle,6.1);
+
+        //Calculating the color
+        //after calculating the intensity we can then determine the color a determined point
+        gl_FragColor   = (ambient + diffuse + specular)* gl_Color ;
+}

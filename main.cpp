@@ -102,8 +102,9 @@ void InitShader(void) {
 char filenameV[] = "Shader/VShader/gouraudV.txt";
 char filenameF[] = "Shader/FShader/gouraudF.txt";
 BuiltShader(filenameV,filenameF,0);
-char filenameV1[] = "Shader/VShader/Vshader_pervertex1.txt";
-BuiltShader(filenameV1,filenameF,1);
+char filenameV1[] = "Shader/VShader/PhongV.txt";
+char filenameF1[] = "Shader/FShader/PhongF.txt";
+BuiltShader(filenameV1,filenameF1,1);
 
 }
 
@@ -143,7 +144,7 @@ void Inicializa(void)
 void Desenha(void)
 {
 
-	glUseProgramObjectARB(ShaderProgram[1]);
+	glUseProgramObjectARB(ShaderProgram[0]);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, wScreen, hScreen);
 
@@ -162,7 +163,7 @@ void Desenha(void)
 	glutSolidTeapot(1);
 	glPopMatrix();
 
-	glUseProgramObjectARB(ShaderProgram[0]);
+	glUseProgramObjectARB(ShaderProgram[1]);
 	glPushMatrix();
 	glTranslatef(3, -1, 0);
 	glutSolidTeapot(1);

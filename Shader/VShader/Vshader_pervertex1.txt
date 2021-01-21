@@ -3,7 +3,7 @@ float intensity;
 vec3  nNormal;
 varying vec4  vVertex;
 varying vec3  vNormal;	
-vec4    cor   = vec4(0.2118, 0.5255, 0.2627, 1.0);
+vec4    cor   = vec4(0.9059, 0.9216, 0.051, 1.0);
 
 void main(void) { 
         vNormal = gl_Normal ;
