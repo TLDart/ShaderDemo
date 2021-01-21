@@ -2,41 +2,47 @@
 float ks = 0.8;
 float ka = 0.4;
 float kd = 0.3;
-attribute vec3 position;
-varying vec3 vertPos;
-uniform vec3 Direcao;
+uniform vec3 lightDir;
 uniform vec3 userPos;
-vec3 I = Direcao;
-varying vec3  R;	
+
+vec4 mat = vec4(0.4,0.3,0.8, 22.0); //Defines ka,ks,kd and shininess of the material
+vec4 matP = vec4(0.0275, 0.4118, 0.9922, 1.0); // Color of the material
+vec4 lightP = vec4(1.0,1.0,1.0, 1.0);// Color of the light 
 
 
 //Notes:
 // In the gouraud method the vertex are calculated using the Phong method and the Fragments are calculated using an interpolation of the Vertex
 
-vec4 color = vec4(0.0275, 0.4118, 0.9922, 1.0);
+/* What is what
+According to slide 110 T6
+N -> Normalize normal vector
+R -> Specular Direction Vector
+I -> Inverse Direction of light, since we have light direction we use -I
+V -> Inverse (Vector -> User ) User Vector 
+*/
+
 void main(void) { 
         float ambient, diffuse, specular;
-        vec3 N, vpos3, V;
+        vec3 N, vpos, V , R, I = lightDir;
 
         N = normalize(gl_Normal);
 	I  = normalize(I); 
 
-        vpos3 = vec3(gl_Vertex) / gl_Vertex.w; // Getting the position of the vector in 3 space 
+        vpos = vec3(gl_Vertex) / gl_Vertex.w; // Getting the position of the vector in 3 space 
         
         //Ambient 
-        ambient = ka * 0.4;
+        ambient = mat[0] * 0.4;
 
         //Difuse
-        diffuse = kd * max(dot(-I, N), 0.0);
+        diffuse = mat[1] * max(dot(-I, N), 0.0);
 
         //Specular
-        V = normalize((userPos - vpos3)); // Getting a vector from user to point
+        V = normalize((userPos - vpos)); // Getting a vector from user to point
         R = reflect(-I,N);
-        specular = ks * pow(max(dot(R, -V), 0.0),22.0);
+        specular = mat[2] * pow(max(dot(R, -V), 0.0),mat[3]);
 
         //Calculating the color
-        //after calculating the intensity we can then determine the color a determined point
-        gl_FrontColor   = (ambient + diffuse + specular)* color ;
+        gl_FrontColor   = (ambient + diffuse + specular)* matP * lightP;
         gl_Position     = gl_ModelViewProjectionMatrix * gl_Vertex;	
 }
 

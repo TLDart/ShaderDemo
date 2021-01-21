@@ -110,7 +110,7 @@ void InitShader(void) {
 	char filenameF[] = "Shader/FShader/gouraudF.glsl";
 	BuiltShader(filenameV, filenameF, 0);
 	glUseProgramObjectARB(ShaderProgram[0]);
-	uniDir[0] = glGetUniformLocation(ShaderProgram[0], "Direcao");
+	uniDir[0] = glGetUniformLocation(ShaderProgram[0], "lightDir");
 	glUniform3fv(uniDir[0], 1, Direcao);
 	uniUserPos[0] = glGetUniformLocation(ShaderProgram[0], "userPos");
 	glUniform3fv (uniUserPos[0], 1, userPos);
@@ -119,7 +119,7 @@ void InitShader(void) {
 	char filenameF1[] = "Shader/FShader/PhongF.glsl";
 	BuiltShader(filenameV1, filenameF1, 1);
 	glUseProgramObjectARB(ShaderProgram[1]);
-	uniDir[1] = glGetUniformLocation(ShaderProgram[1], "Light_dir");
+	uniDir[1] = glGetUniformLocation(ShaderProgram[1], "lightDir");
 	glUniform3fv(uniDir[1], 1, Direcao);
 	uniUserPos[1] = glGetUniformLocation(ShaderProgram[1], "userPos");
 	glUniform3fv (uniUserPos[1], 1, userPos);
@@ -151,7 +151,6 @@ void Desenha(void)
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	//gluPerspective(90, 1, 0.1, 10.0);
 	glOrtho(-5, 5, -5, 5, -5, 5);
 
 	glMatrixMode(GL_MODELVIEW);
