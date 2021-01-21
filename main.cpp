@@ -41,7 +41,7 @@ char filenameF[] = "Shader/FShader/gouraudF.txt";
 char* VertexShaderSource;
 char* FragmentShaderSource;
 GLuint  VertexShader, FragmentShader;
-GLuint  ShaderProgram;
+GLuint  ShaderProgram[2];
 
 
 //============================================= 1. Ler um ficheiro com um shader
@@ -71,7 +71,8 @@ char* readShaderFile(char* FileName) {
 
 
 //============================================= 2. Criar, compilar, linkar, e usar
-void BuiltShader(void) {
+void BuiltShader(char * f1, char* f2, int n) {
+
 
 	GLEW_ARB_vertex_shader;
 	GLEW_ARB_fragment_shader;
@@ -79,8 +80,8 @@ void BuiltShader(void) {
 	//......................................................... Criar
 	VertexShader = glCreateShader(GL_VERTEX_SHADER);
 	FragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	VertexShaderSource = readShaderFile(filenameV);
-	FragmentShaderSource = readShaderFile(filenameF);
+	VertexShaderSource = readShaderFile(f1);
+	FragmentShaderSource = readShaderFile(f2);
 
 	const char* VS = VertexShaderSource;
 	const char* FS = FragmentShaderSource;
@@ -94,37 +95,37 @@ void BuiltShader(void) {
 	glCompileShaderARB(FragmentShader);
 
 	//......................................................... Criar e Linkar
-	ShaderProgram = glCreateProgramObjectARB();
-	glAttachShader(ShaderProgram, VertexShader);
-	glAttachShader(ShaderProgram, FragmentShader);
-	glLinkProgram(ShaderProgram);
+	ShaderProgram[n] = glCreateProgramObjectARB();
+	glAttachShader(ShaderProgram[n], VertexShader);
+	glAttachShader(ShaderProgram[n], FragmentShader);
+	glLinkProgram(ShaderProgram[n]);
 
 	//......................................................... Usar
-	glUseProgramObjectARB(ShaderProgram);
+	glUseProgramObjectARB(ShaderProgram[n]);
 }
 
 
 void InitShader(void) {
 
 	//------------------------ Criar+linkar
-	BuiltShader();
+	BuiltShader(filenameV, filenameF, 0);
 
 	//------------------------------------  UYNIORM
 	
-	uniDir = glGetUniformLocation(ShaderProgram, "Direcao");
+	uniDir = glGetUniformLocation(ShaderProgram[0], "Direcao");
 	glUniform3fv(uniDir, 1, Direcao);
-	uniOp = glGetUniformLocation(ShaderProgram, "opcao");
+	uniOp = glGetUniformLocation(ShaderProgram[0], "opcao");
 	glUniform1f (uniOp, opcao);
-	uniUserPos = glGetUniformLocation(ShaderProgram, "userPos");
+	uniUserPos = glGetUniformLocation(ShaderProgram[0], "userPos");
 	glUniform3fv (uniUserPos, 1, userPos);
 }
 
 
 //============================================= 3.Libertar os Shaders
-void DeInitShader(void) {
-	glDetachShader(ShaderProgram, VertexShader);
-	glDetachShader(ShaderProgram, FragmentShader);
-	glDeleteShader(ShaderProgram);
+void DeInitShader(int n) {
+	glDetachShader(ShaderProgram[n], VertexShader);
+	glDetachShader(ShaderProgram[n], FragmentShader);
+	glDeleteShader(ShaderProgram[n]);
 }
 
 
@@ -171,7 +172,7 @@ void Desenha(void)
 
 	Direcao[0] = cos(3.14*opcao/180.0);
 	Direcao[2] = sin(3.14 * opcao / 180.0);
-	glUseProgramObjectARB(ShaderProgram);
+	glUseProgramObjectARB(ShaderProgram[0]);
 	glColor3f(1,1,0);
 	glPushMatrix();
 		glTranslatef(2, 0, 0);
@@ -245,7 +246,7 @@ int main(int argc, char** argv)
 	GLenum err = glewInit();
 	InitShader();
 
-	DeInitShader();
+	DeInitShader(0);
 
 
 
