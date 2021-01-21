@@ -29,9 +29,9 @@ GLint	wScreen = 800, hScreen = 800;		//.. janela
 GLint  uniOp[2];
 GLint  uniDir[2];
 GLint  uniUserPos[2];
-float  Direcao[] = { 1, 0, 1 };
-float userPos[] = {0,1,6};
-float  opcao = -45;
+float  Direcao[] = {0, -1, 1 };
+float userPos[] = {0,0,4};
+float  opcao = 0;
 
 //------------------------------------------ Defini��o dos ficheiros dos shaders: vertices + fragmentos
 
@@ -112,8 +112,6 @@ void InitShader(void) {
 	glUseProgramObjectARB(ShaderProgram[0]);
 	uniDir[0] = glGetUniformLocation(ShaderProgram[0], "Direcao");
 	glUniform3fv(uniDir[0], 1, Direcao);
-	uniOp[0] = glGetUniformLocation(ShaderProgram[0], "opcao");
-	glUniform1f (uniOp[0], opcao);
 	uniUserPos[0] = glGetUniformLocation(ShaderProgram[0], "userPos");
 	glUniform3fv (uniUserPos[0], 1, userPos);
 
@@ -123,7 +121,7 @@ void InitShader(void) {
 	glUseProgramObjectARB(ShaderProgram[1]);
 	uniDir[1] = glGetUniformLocation(ShaderProgram[1], "Light_dir");
 	glUniform3fv(uniDir[1], 1, Direcao);
-	uniUserPos[1] = glGetUniformLocation(ShaderProgram[1], "Obs_pos");
+	uniUserPos[1] = glGetUniformLocation(ShaderProgram[1], "userPos");
 	glUniform3fv (uniUserPos[1], 1, userPos);
 	
 }
@@ -136,16 +134,6 @@ void DeInitShader(int n) {
 	glDeleteShader(ShaderProgram[n]);
 }
 
-
-//=========================================================================== 
-//==================================================================  SHADERS
-//=========================================================================== 
-
-
-
-//-----------------------------------------------------------------------------------
-//																		Inicializacao
-//-----------------------------------------------------------------------------------
 void Inicializa(void)
 {
 	glClearColor(0.0, 0.0, 0.0, 1.0);	//....	Cor para apagar ecran (Preto)
@@ -155,12 +143,6 @@ void Inicializa(void)
 
 }
 
-
-//-----------------------------------------------------------------------------------
-//-------------------------------------------------------------------- INTERACCAO
-//-----------------------------------------------------------------------------------
-
-//---------------------------------------- Fun��o callback de desenho (principal)
 void Desenha(void)
 {
 
@@ -169,7 +151,8 @@ void Desenha(void)
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(90, 1, 0.1, 10.0);
+	//gluPerspective(90, 1, 0.1, 10.0);
+	glOrtho(-5, 5, -5, 5, -5, 5);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -178,7 +161,7 @@ void Desenha(void)
 	Direcao[0] = cos(3.14*opcao/180.0);
 	Direcao[2] = sin(3.14 * opcao / 180.0);
 
-	glUseProgramObjectARB(ShaderProgram[0]);
+	glUseProgramObjectARB(ShaderProgram[1]);
 	glUniform1f(uniOp[0], opcao);
 	glUniform3fv(uniDir[0], 1, Direcao);
 	glUniform3fv (uniUserPos[0], 1, userPos);
@@ -186,10 +169,11 @@ void Desenha(void)
 	glColor3f(1,1,0);
 	glPushMatrix();
 		glTranslatef(2, 0, 0);
-		glutSolidTeapot(1);
+		//glutSolidTeapot(1);
+		glutSolidSphere(0.8,32,32);
 	glPopMatrix();
 	
-	glUseProgramObjectARB(ShaderProgram[1]);
+	glUseProgramObjectARB(ShaderProgram[0]);
 	glUniform1f(uniOp[1], opcao);
 	glUniform3fv(uniDir[1], 1, Direcao);
 	glUniform3fv (uniUserPos[1], 1, userPos);
@@ -198,7 +182,8 @@ void Desenha(void)
 	glColor3f(1,0,0);
 	glPushMatrix();
 		glTranslatef(-2, 0, 0);
-		glutSolidTeapot(1);
+		//glutSolidTeapot(1);
+		glutSolidSphere(0.8,32,32);
 	glPopMatrix();
 
 	glutSwapBuffers();						//.. actualiza ecran
@@ -251,7 +236,7 @@ int main(int argc, char** argv)
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 	glutInitWindowSize(800, 800);					//		:dimensoes (pixeis)
 	glutInitWindowPosition(500, 40);				//		:localizacao
-	glutCreateWindow(" ::: #Varying1 | Teclas O  | jh/ct/ep @dei - 2020/21  :::::::: ");
+	glutCreateWindow("Phong and Gouraud Shader Demo");
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	Inicializa();
