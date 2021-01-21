@@ -26,21 +26,19 @@ GLint	wScreen = 800, hScreen = 800;		//.. janela
 
 //------------------------------------------------------------ Observador 
 
-GLint  uniOp  ;
-GLint  uniDir ;
-GLint  uniUserPos;
+GLint  uniOp[2];
+GLint  uniDir[2];
+GLint  uniUserPos[2];
 float  Direcao[] = { 1, 0, 1 };
 float userPos[] = {0,1,6};
 float  opcao = -45;
 
 //------------------------------------------ Defini��o dos ficheiros dos shaders: vertices + fragmentos
-char filenameV[] = "Shader/VShader/gouraudV.txt";
-char filenameF[] = "Shader/FShader/gouraudF.txt";
 
 //---------------------------------------------------------- SHADERS variaveis
 char* VertexShaderSource;
 char* FragmentShaderSource;
-GLuint  VertexShader, FragmentShader;
+GLuint  VertexShader[2], FragmentShader[2];
 GLuint  ShaderProgram[2];
 
 
@@ -78,26 +76,26 @@ void BuiltShader(char * f1, char* f2, int n) {
 	GLEW_ARB_fragment_shader;
 
 	//......................................................... Criar
-	VertexShader = glCreateShader(GL_VERTEX_SHADER);
-	FragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	VertexShader[n] = glCreateShader(GL_VERTEX_SHADER);
+	FragmentShader[n] = glCreateShader(GL_FRAGMENT_SHADER);
 	VertexShaderSource = readShaderFile(f1);
 	FragmentShaderSource = readShaderFile(f2);
 
 	const char* VS = VertexShaderSource;
 	const char* FS = FragmentShaderSource;
-	glShaderSource(VertexShader, 1, &VS, NULL);
-	glShaderSource(FragmentShader, 1, &FS, NULL);
+	glShaderSource(VertexShader[n], 1, &VS, NULL);
+	glShaderSource(FragmentShader[n], 1, &FS, NULL);
 	free(VertexShaderSource);
 	free(FragmentShaderSource);
 
 	//......................................................... Compilar
-	glCompileShaderARB(VertexShader);
-	glCompileShaderARB(FragmentShader);
+	glCompileShaderARB(VertexShader[n]);
+	glCompileShaderARB(FragmentShader[n]);
 
 	//......................................................... Criar e Linkar
 	ShaderProgram[n] = glCreateProgramObjectARB();
-	glAttachShader(ShaderProgram[n], VertexShader);
-	glAttachShader(ShaderProgram[n], FragmentShader);
+	glAttachShader(ShaderProgram[n], VertexShader[n]);
+	glAttachShader(ShaderProgram[n], FragmentShader[n]);
 	glLinkProgram(ShaderProgram[n]);
 
 	//......................................................... Usar
@@ -108,23 +106,33 @@ void BuiltShader(char * f1, char* f2, int n) {
 void InitShader(void) {
 
 	//------------------------ Criar+linkar
+	char filenameV[] = "Shader/VShader/gouraudV.txt";
+	char filenameF[] = "Shader/FShader/gouraudF.txt";
 	BuiltShader(filenameV, filenameF, 0);
+	glUseProgramObjectARB(ShaderProgram[0]);
+	uniDir[0] = glGetUniformLocation(ShaderProgram[0], "Direcao");
+	glUniform3fv(uniDir[0], 1, Direcao);
+	uniOp[0] = glGetUniformLocation(ShaderProgram[0], "opcao");
+	glUniform1f (uniOp[0], opcao);
+	uniUserPos[0] = glGetUniformLocation(ShaderProgram[0], "userPos");
+	glUniform3fv (uniUserPos[0], 1, userPos);
 
-	//------------------------------------  UYNIORM
+	char filenameV1[] = "Shader/VShader/PhongV.txt";
+	char filenameF1[] = "Shader/FShader/PhongF.txt";
+	BuiltShader(filenameV1, filenameF1, 1);
+	glUseProgramObjectARB(ShaderProgram[1]);
+	uniDir[1] = glGetUniformLocation(ShaderProgram[1], "Light_dir");
+	glUniform3fv(uniDir[1], 1, Direcao);
+	uniUserPos[1] = glGetUniformLocation(ShaderProgram[1], "Obs_pos");
+	glUniform3fv (uniUserPos[1], 1, userPos);
 	
-	uniDir = glGetUniformLocation(ShaderProgram[0], "Direcao");
-	glUniform3fv(uniDir, 1, Direcao);
-	uniOp = glGetUniformLocation(ShaderProgram[0], "opcao");
-	glUniform1f (uniOp, opcao);
-	uniUserPos = glGetUniformLocation(ShaderProgram[0], "userPos");
-	glUniform3fv (uniUserPos, 1, userPos);
 }
 
 
 //============================================= 3.Libertar os Shaders
 void DeInitShader(int n) {
-	glDetachShader(ShaderProgram[n], VertexShader);
-	glDetachShader(ShaderProgram[n], FragmentShader);
+	glDetachShader(ShaderProgram[n], VertexShader[n]);
+	glDetachShader(ShaderProgram[n], FragmentShader[n]);
 	glDeleteShader(ShaderProgram[n]);
 }
 
@@ -167,20 +175,26 @@ void Desenha(void)
 	glLoadIdentity();
 	gluLookAt(userPos[0],userPos[1],userPos[2], 0, 0, 0, 0, 1, 0);
 	
-	glUniform1f(uniOp, opcao);
-	glUniform3fv(uniDir, 1, Direcao);
-
 	Direcao[0] = cos(3.14*opcao/180.0);
 	Direcao[2] = sin(3.14 * opcao / 180.0);
+
 	glUseProgramObjectARB(ShaderProgram[0]);
+	glUniform1f(uniOp[0], opcao);
+	glUniform3fv(uniDir[0], 1, Direcao);
+	glUniform3fv (uniUserPos[0], 1, userPos);
+
 	glColor3f(1,1,0);
 	glPushMatrix();
 		glTranslatef(2, 0, 0);
 		glutSolidTeapot(1);
 	glPopMatrix();
 	
+	glUseProgramObjectARB(ShaderProgram[1]);
+	glUniform1f(uniOp[1], opcao);
+	glUniform3fv(uniDir[1], 1, Direcao);
+	glUniform3fv (uniUserPos[1], 1, userPos);
 
-	
+
 	glColor3f(1,0,0);
 	glPushMatrix();
 		glTranslatef(-2, 0, 0);
@@ -246,7 +260,6 @@ int main(int argc, char** argv)
 	GLenum err = glewInit();
 	InitShader();
 
-	DeInitShader(0);
 
 
 
@@ -258,5 +271,7 @@ int main(int argc, char** argv)
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	glutMainLoop();								//===4:Inicia processamento
+	DeInitShader(0);
+	DeInitShader(1);
 	return 1;
 }
