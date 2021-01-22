@@ -53,6 +53,7 @@ char* readShaderFile(char* FileName) {
 	}
 	else {
 		printf(" --------  Error while reading  %s ", FileName);
+		return NULL;
 	}
 }
 

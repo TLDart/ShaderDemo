@@ -18,7 +18,7 @@ According to slide 110 T6
 N -> Normalize normal vector
 R -> Specular Direction Vector
 I -> Inverse Direction of light, since we have light direction we use -I
-V -> Inverse (Vector -> User ) User Vector 
+V -> Vector -> User User Vector 
 */
 
 void main(void) { 
@@ -37,9 +37,9 @@ void main(void) {
         diffuse = mat[1] * max(dot(-I, N), 0.0);
 
         //Specular
-        V = normalize((userPos - vpos)); // Getting a vector from user to point
+        V = normalize(vpos - userPos); // Getting a vector from user to point
         R = reflect(-I,N);
-        specular = mat[2] * pow(max(dot(R, -V), 0.0),mat[3]);
+        specular = mat[2] * pow(max(dot(R, V), 0.0),mat[3]);
 
         //Calculating the color
         gl_FrontColor   = (ambient + diffuse + specular)* matP * lightP;

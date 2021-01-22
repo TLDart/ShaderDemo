@@ -15,14 +15,14 @@ According to slide 110 T6
 N -> Normalize normal vector
 R -> Specular Direction Vector
 I -> Inverse Direction of light, since we have light direction we use -I
-V -> Inverse (Vector -> User ) User Vector 
+V -> Vector -> User User Vector 
 */
 void main(void) {
     float ambient, diffuse, specular;
     vec3 V,N, R, I;
     I = normalize(lightDir);
     N = normalize(nNormal);
-    V = normalize((userPos - vPos3)); // Getting a vector from user to point
+    V = normalize(vPos3 - userPos); // Getting a vector from user to point
 
     //Ambient
     ambient = mat[0] * 0.4;
@@ -32,7 +32,7 @@ void main(void) {
 
     //Specular
     R = reflect(-I,N);
-    specular = mat[2] * pow(max(dot(R, -V), 0.0),mat[3]);
+    specular = mat[2] * pow(max(dot(R, V), 0.0),mat[3]);
 
     gl_FragColor   = (ambient + diffuse + specular)* matP * lightP ;
 }
